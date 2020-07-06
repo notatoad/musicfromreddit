@@ -1,5 +1,6 @@
 import fetch from 'node-fetch'
 import pg from 'pg'
+import async from 'async'
 
 const {Pool, Client} = pg
 
@@ -75,11 +76,16 @@ class RedditParser extends Parser{
     }
 }
 
-Promise.all(SOURCES.map(sourceConfig=>{
-    if(sourceConfig.parser=='reddit'){
-        let parser = new RedditParser(sourceConfig)
-        return parser.poll()
+async.forever(async ()=>{
+    await Promise.all(SOURCES.map(sourceConfig=>{
+        if(sourceConfig.parser=='reddit'){
+            let parser = new RedditParser(sourceConfig)
+            return parser.poll()
+        }
+    }))
+    const POLL_WAIT = 30
+    for(let ix=0; ix<POLL_WAIT; ix++){
+        await new Promise(resolve=>setTimeout(resolve, 1000))
     }
-})).catch(exc=>{
-    console.log(exc)
+    
 })
