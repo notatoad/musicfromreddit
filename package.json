@@ -2,7 +2,9 @@
   "main": "main.js",
   "type": "module",
   "dependencies": {
-    "node-fetch": "^2.6.0"
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.0",
+    "pg": "^8.2.1"
   },
   "scripts": {
     "start": "nodejs main.js"

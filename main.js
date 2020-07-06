@@ -1,42 +1,85 @@
 import fetch from 'node-fetch'
+import pg from 'pg'
 
-const SR_NAME = 'popheads'
-const VALID_FLAIRS = [
-    /\[FRESH VIDEO\]/i,
-    /\[FRESH\]/i,
-    /\[FRESH ALBUM\]/i,
+const {Pool, Client} = pg
+
+const pool = new Pool({
+    database: 'redfresh',
+    user: 'redfresh',
+    password: '8X4C*i@tPbFE',
+})
+
+const SOURCES = [
+    {
+        parser: 'reddit',
+        name: 'popheads',
+        subreddit: 'popheads',
+        flair: [
+            /\[FRESH VIDEO\]/i,
+            /\[FRESH\]/i,
+            /\[FRESH ALBUM\]/i,
+        ]
+    }
 ]
 
-async function processSingleListing(item){
-    let simplifiedProperties = {
-        id: item.id,
-        flair: item.link_flair_text, 
-        title: item.title,
-        score: item.score,
-        permalink: item.permalink,
-        created_utc: item.created_utc,
-        url: item.url
+class Parser{
+    constructor(sourceConfig){
+
     }
-    console.log(simplifiedProperties)
-
 }
 
-async function processListingResponse(items){
-    await Promise.all(items.filter(item=>{
-        return VALID_FLAIRS.some(pattern=>(item.link_flair_text||'').match(pattern))
-    }).map(item=>{
-        return processSingleListing(item)
-    }))
-}
+class RedditParser extends Parser{
+    constructor(sourceConfig){
+        super()
+        this.name = sourceConfig.name
+        this.subreddit = sourceConfig.subreddit || sourceConfig.name
+        this.valid_flairs = sourceConfig.flair
+    }
 
-fetch(`https://www.reddit.com/r/${SR_NAME}/top.json?t=week`)
-    .then(response=>response.json())
-    .then(response=>{
+    async poll(){
+        let response = await fetch(`https://www.reddit.com/r/${this.subreddit}/hot.json`)
+        response = await response.json()
         if(response.data && response.data.children){
-            return processListingResponse(
-                response.data.children.map(item=>item.data)
+            await Promise.all(
+                response.data.children
+                    .map(item=>item.data)
+                    .filter(item=>{
+                        return this.valid_flairs.some(
+                            pattern=>(item.link_flair_text||'').match(pattern)
+                        )
+                    })
+                    .map(item=>this.processSingleListing(item))
             )
+        }    
+    }
+
+    async processSingleListing(item){
+        let simplifiedProperties = {
+            id: item.id,
+            flair: item.link_flair_text, 
+            title: item.title,
+            score: item.score,
+            permalink: item.permalink,
+            created_utc: item.created_utc,
+            url: item.url
         }
-    }).then(()=>{
-        console.log('DONE!')
-    })
+        await pool.query(
+            'INSERT INTO recommendations '+
+            '(external_id, title, score, permalink, created, link) '+
+            'VALUES ($1, $2, $3, $4, $5, $6) '+
+            'ON CONFLICT (external_id) DO UPDATE SET '+
+            'title=$2, score=$3, permalink=$4, created=$5, link=$6',
+            [item.id, item.title, item.score, item.permalink, new Date(item.created_utc), item.url]
+        )
+        console.log(simplifiedProperties)
+    }
+}
+
+Promise.all(SOURCES.map(sourceConfig=>{
+    if(sourceConfig.parser=='reddit'){
+        let parser = new RedditParser(sourceConfig)
+        return parser.poll()
+    }
+})).catch(exc=>{
+    console.log(exc)
+})

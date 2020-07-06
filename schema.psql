@@ -1,0 +1,19 @@
+CREATE TABLE sources (
+    id SERIAL PRIMARY KEY,
+    url TEXT,
+    name TEXT,
+    parser TEXT,
+    created TIMESTAMP
+);
+
+CREATE TABLE recommendations (
+    id SERIAL PRIMARY KEY,
+    source INTEGER,
+    external_id TEXT,
+    title TEXT,
+    score NUMERIC,
+    permalink TEXT,
+    created TIMESTAMP,
+    link TEXT
+);
+ALTER TABLE recommendations ADD CONSTRAINT unique_external_id UNIQUE (external_id);
