@@ -7,7 +7,6 @@ const {Pool, Client} = pg
 const pool = new Pool({
     database: 'redfresh',
     user: 'redfresh',
-    password: '8X4C*i@tPbFE',
 })
 
 const SOURCES = [
@@ -70,9 +69,15 @@ class RedditParser extends Parser{
             'VALUES ($1, $2, $3, $4, $5, $6) '+
             'ON CONFLICT (external_id) DO UPDATE SET '+
             'title=$2, score=$3, permalink=$4, created=$5, link=$6',
-            [item.id, item.title, item.score, item.permalink, new Date(item.created_utc*1000), item.url]
+            [
+                item.id, 
+                item.title, 
+                item.score, 
+                item.permalink, 
+                new Date(item.created_utc*1000), 
+                item.url
+            ]
         )
-        console.log(simplifiedProperties)
     }
 }
 
