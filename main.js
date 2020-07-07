@@ -73,7 +73,7 @@ class RedditParser extends Parser{
                 item.id, 
                 item.title, 
                 item.score, 
-                item.permalink, 
+                `http://reddit.com${item.permalink}`, 
                 new Date(item.created_utc*1000), 
                 item.url
             ]
