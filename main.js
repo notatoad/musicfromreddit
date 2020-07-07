@@ -1,9 +1,10 @@
 import fetch from 'node-fetch'
 import pg from 'pg'
 import async from 'async'
+import Entities from 'html-entities'
 
 const {Pool, Client} = pg
-
+const htmlEntities = new Entities.XmlEntities()
 const pool = new Pool({
     database: 'redfresh',
     user: 'redfresh',
@@ -54,15 +55,7 @@ class RedditParser extends Parser{
     }
 
     async processSingleListing(item){
-        let simplifiedProperties = {
-            id: item.id,
-            flair: item.link_flair_text, 
-            title: item.title,
-            score: item.score,
-            permalink: item.permalink,
-            created_utc: item.created_utc,
-            url: item.url
-        }
+        console.log(item.id)
         await pool.query(
             'INSERT INTO recommendations '+
             '(external_id, title, score, permalink, created, link) '+
@@ -71,7 +64,7 @@ class RedditParser extends Parser{
             'title=$2, score=$3, permalink=$4, created=$5, link=$6',
             [
                 item.id, 
-                item.title, 
+                htmlEntities.decode(item.title), 
                 item.score, 
                 `http://reddit.com${item.permalink}`, 
                 new Date(item.created_utc*1000), 
