@@ -54,7 +54,6 @@
             font-size: 1.5rem;
             font-weight: 600;
             line-height: 1.6;
-            display: block;
         }
         .recommendation .title span{
             color: black;
@@ -62,7 +61,9 @@
         .recommendation .title:hover{
             text-decoration: underline;
         }
-
+        .recommendation .permalink{
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -72,7 +73,10 @@
         {{#recs}}
         <li class="recommendation">
             <span class="score">{{score}}</span>
-            <a href="{{link}}" class="title"><span>{{title}}</span></a>
+            <div>
+                <a href="{{link}}" class="title"><span>{{title}}</span></a>
+                <a href="{{permalink}}" class="permalink">🔗</a>
+            </div>
         </li>
         {{/recs}}
     </ul>
