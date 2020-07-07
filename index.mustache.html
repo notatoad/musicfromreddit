@@ -9,10 +9,13 @@
             padding: 2em 1em;
             font-family: "Open Sans", sans-serif;
         }
+
+        h1,h2,h3{
+            font-family: 'Fjalla One', sans-serif;
+        }
         h1{
             text-align: center;
             color: red;
-            font-family: 'Fjalla One', sans-serif;
             font-size: 4rem;
             font-weight: 900;
         }
@@ -64,6 +67,16 @@
         .recommendation .permalink{
             text-decoration: none;
         }
+
+        .info{
+            margin: 4em 0;
+            font-size: 1em;
+            color: #666;
+        }
+
+        .info h3{
+            color: black;
+        }
     </style>
 </head>
 <body>
@@ -82,5 +95,17 @@
         </li>
         {{/recs}}
     </ul>
+    <div class="info">
+        <h3>What is this?</h3>
+        <p>
+            It's everything that appears on the top 25 of /r/popheads 
+            with a "fresh" flair, ordered by total upvotes, and grouped by week.
+        </p>
+        <h3>Why?</h3>
+        <p>
+            Because when i check reddit i already have music playing.  and then 
+            i can't find all these songs later.
+        </p>
+    </div>
 </body>
 </html>
